@@ -1,9 +1,12 @@
 package com.nanda.crashreport.helper;
 
 import android.content.Context;
+import android.os.Environment;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.nanda.crashreport.app.AppConstants;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,11 +24,9 @@ public class CustomExceptionHandler implements Thread.UncaughtExceptionHandler {
     private final static String TAG = CustomExceptionHandler.class.getSimpleName();
     private final Context context;
     private final Thread.UncaughtExceptionHandler rootHandler;
-    private String errorLogPath;
 
-    public CustomExceptionHandler(Context context, String errorLogPath) {
+    public CustomExceptionHandler(Context context) {
         this.context = context;
-        this.errorLogPath = errorLogPath;
         rootHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(this);
     }
@@ -36,7 +37,7 @@ public class CustomExceptionHandler implements Thread.UncaughtExceptionHandler {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             ex.printStackTrace(pw);
-            handleUncaughtException(sw.toString(), errorLogPath);
+            handleUncaughtException(sw.toString());
         } catch (Exception e) {
             Log.e(TAG, "Exception Logger failed!", e);
         }
@@ -59,9 +60,9 @@ public class CustomExceptionHandler implements Thread.UncaughtExceptionHandler {
         rootHandler.uncaughtException(thread, ex);
     }
 
-    private void handleUncaughtException(String throwable, String errorLogPath) {
+    private void handleUncaughtException(String throwable) {
 
-        File file = new File(errorLogPath);
+        File file = new File(Environment.getExternalStorageDirectory() + File.separator + AppConstants.LOG_DIRECTORY);
         if (!file.exists())
             file.mkdir();
         else {
